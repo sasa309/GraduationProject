@@ -1,31 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <suite name="Failed suite [AddToCart_Suite]">
-  <test thread-count="5" name="AddToCart_HappyCases(failed)">
-    <classes>
-      <class name="Tests.AddToCart_HappyScenario">
-        <methods>
-          <include name="openBrowser"/>
-          <include name="shouldAddProductTwiceWithDifferentQuantities_AndSumThemInCart"/>
-          <include name="afterTest"/>
-          <include name="userCanAddProductToCart_FromRecommendedItems"/>
-          <include name="userCanAddProductToCart_FromDetailsPage_WithDefaultQuantity"/>
-          <include name="increaseQuantity_AddToCart"/>
-        </methods>
-      </class> <!-- Tests.AddToCart_HappyScenario -->
-    </classes>
-  </test> <!-- AddToCart_HappyCases(failed) -->
   <test thread-count="5" name="AddToCart_NegativeCases(failed)">
     <classes>
       <class name="Tests.AddToCart_NegativeScenario">
         <methods>
-          <include name="addZeroQuantityProduct"/>
           <include name="openBrowser"/>
           <include name="afterTest"/>
-          <include name="addToCart_OutOfStockProduct"/>
           <include name="addNonNumericQuantity"/>
-          <include name="addoverlimitQuantityProduct"/>
-          <include name="addNegativeQuantityProduct"/>
+          <include name="addInvalidQuantityProduct" invocation-numbers="0 1 2"/>
         </methods>
       </class> <!-- Tests.AddToCart_NegativeScenario -->
     </classes>

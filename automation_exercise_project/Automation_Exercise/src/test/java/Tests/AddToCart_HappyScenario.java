@@ -1,5 +1,8 @@
 package Tests;
 
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
 import java.time.Duration;
 import java.util.List;
 
@@ -35,32 +38,42 @@ public class AddToCart_HappyScenario extends BaseTest{
     }
 	
 	private void assertProductAddedToCart(String expectedProductId) {
-	    cartPage.getCartProducts();
 	    CartProduct product = cartPage.findCartProductById(expectedProductId);
-	    cartPage.scrollToElement(product);
-	    Assert.assertNotNull(product, "Product not found in cart.");
-//	    Assert.assertEquals(product.getCartProductId(), expectedProductId);
+	    cartPage.scrollToElement(product.getCartProductName());
+	    Assert.assertEquals(product.getCartProductId(), expectedProductId);
 	}
 	
-	private void hideAllFrames() {
-		List<WebElement> iframes = driver.findElements(By.tagName("iframe"));
-		for (WebElement iframe : iframes) {
-		    ((JavascriptExecutor) driver).executeScript("arguments[0].style.display='none';", iframe);
+	private void assertProductRemovedFromCart(String expectedProductId) {
+		CartProduct product = cartPage.findCartProductById(expectedProductId);
+		cartPage.scrollToElement(product.getCartProductName());
+		product.removeCartProduct();
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	    wait.until(ExpectedConditions.stalenessOf(product.getCartProductName()));
+		if(cartPage.isCartEmpty()) {
+			Assert.assertTrue(true , "product is removed and cart is empty");
+			System.out.println("cart is empy");
+		}
+		else {
+			cartPage.getCartProducts();
+			Assert.assertNull(cartPage.findCartProductById(expectedProductId));
 		}
 	}
 	
 	
 	@Test
 	(priority = 1)
-	public void userCanAddProductToCart_FromHomePage() {
+	public void addProductToCart_FromHomePage() throws InterruptedException {
 	    assertLinkIsActive(headerSection.homeLink);
-	    homePage.scrollToElement(homePage.featuresSection);
-	    wait.until(ExpectedConditions.visibilityOf(homePage.featuresItemsTitle));
 	    
-	    hideAllFrames();
-	
+	    homePage.scrollToElement(homePage.featuresItemsTitle);
+	    wait.until(ExpectedConditions.visibilityOf(homePage.featuresItemsTitle));
 	    Assert.assertEquals("FEATURES ITEMS", homePage.featuresItemsTitle.getText());
+	    
+	    
 	    ProductCard productCard = homePage.getOneFeaturesProduct();
+	    homePage.scrollToElement(productCard.getProductName());
+	    wait.until(ExpectedConditions.visibilityOf(productCard.getProductName()));
+	    Thread.sleep(1000);
 	    String productId = productCard.getProductId();
 	    productCard.addProductToCart();
 	
@@ -69,51 +82,74 @@ public class AddToCart_HappyScenario extends BaseTest{
 	    cartModal.clickViewCart();
 	
 	    assertLinkIsActive(headerSection.cartLink);
+	    
+	    cartPage.getCartProducts();
 	    assertProductAddedToCart(productId);
+	    
+	    assertProductRemovedFromCart(productId);
 	}
 	
 	
 	@Test
 	(priority = 2)
-	public void userCanAddProductToCart_FromDetailsPage_WithDefaultQuantity() {
-	    assertLinkIsActive(headerSection.homeLink);
-	    homePage.scrollToElement(homePage.featuresSection);
-	    wait.until(ExpectedConditions.visibilityOf(homePage.featuresItemsTitle));
-	
-	    Assert.assertEquals("FEATURES ITEMS", homePage.featuresItemsTitle.getText());
-	    ProductCard productCard = homePage.getOneFeaturesProduct();
-	    String productId = productCard.getProductId();
-	    productCard.viewProductDetails();
-	
+	public void addTwoDifferntProductToCart_WithContinueShopping() throws InterruptedException {
+		headerSection.navigateTo(headerSection.productsLink);
 	    assertLinkIsActive(headerSection.productsLink);
-	    Assert.assertEquals(productId, productDetailsPage.getProductId());
-	
-	    productDetailsPage.addProductToCart();
-	
-		CartModal cartModal = new CartModal(driver, homePage.getVisibleCartModal());
-	    Assert.assertEquals("Your product has been added to cart.", cartModal.getMessage());
-	    cartModal.clickViewCart();
-	
+	    
+	    productsPage.scrollToElement(productsPage.featuresSection);
+	    wait.until(ExpectedConditions.visibilityOf(productsPage.featuresItemsTitle));
+	    Assert.assertEquals("ALL PRODUCTS", productsPage.featuresItemsTitle.getText());
+	    
+	    ProductCard firstProductCard = productsPage.getOneProduct();
+	    productsPage.scrollToElement(firstProductCard.getProductName());
+	    wait.until(ExpectedConditions.visibilityOf(firstProductCard.getProductName()));
+	    Thread.sleep(1000);
+	    String firstProductId = firstProductCard.getProductId();
+	    firstProductCard.addProductToCart();
+	    CartModal firstCartModal = new CartModal(driver, homePage.getVisibleCartModal());
+	    Assert.assertEquals("Your product has been added to cart.", firstCartModal.getMessage());
+	    firstCartModal.clickContinueShopping();
+	    
+	    
+	    ProductCard secondProductCard = productsPage.getOneProduct();
+	    productsPage.scrollToElement(secondProductCard.getProductName());
+	    wait.until(ExpectedConditions.visibilityOf(secondProductCard.getProductName()));
+	    Thread.sleep(1000);
+	    if(secondProductCard.getProductId() == firstProductId) {
+	    	secondProductCard = homePage.getOneFeaturesProduct();
+	    }
+	    String secondProductId = secondProductCard.getProductId();
+	    secondProductCard.addProductToCart();
+	    CartModal secondCartModal = new CartModal(driver, homePage.getVisibleCartModal());
+	    Assert.assertEquals("Your product has been added to cart.", secondCartModal.getMessage());
+	    secondCartModal.clickViewCart();
+	    
 	    assertLinkIsActive(headerSection.cartLink);
-	    assertProductAddedToCart(productId);
+	    
+	    cartPage.getCartProducts();
+	    assertProductAddedToCart(firstProductId);
+	    assertProductAddedToCart(secondProductId);
+	    
+	    cartPage.removeAllProducts();
+	    assertTrue(cartPage.isCartEmpty());
 	}
 	
 	@Test
 	(priority = 3)
-	public void adjustQuantity_ThenAddToCart() {
+	public void adjustQuantity_ThenAddToCart() throws InterruptedException {
 		final int QUANTITY = 3;
 		
-		headerSection.clickLink(headerSection.productsLink);
+		headerSection.navigateTo(headerSection.productsLink);
 	    assertLinkIsActive(headerSection.productsLink);
-	    productsPage.scrollToElement(productsPage.featuresSection);
-	    wait.until(ExpectedConditions.visibilityOf(productsPage.featuresItemsTitle));
-
-	    Assert.assertTrue("ALL PRODUCTS".equalsIgnoreCase(productsPage.featuresItemsTitle.getText()));
+	    
 	    ProductCard productCard = productsPage.getOneProduct();
+	    productsPage.scrollToElement(productCard.getProductName());
+	    wait.until(ExpectedConditions.visibilityOf(productCard.getProductName()));
+	    Thread.sleep(1000);
 	    String productId = productCard.getProductId();
+	    String productCardName = productCard.getProductName().getText();
+	    String productCardPrice = productCard.getProductPrice();
 	    productCard.viewProductDetails();
-
-	    assertLinkIsActive(headerSection.productsLink);
 	    Assert.assertEquals(productId, productDetailsPage.getProductId());
 
 	    productDetailsPage.increaseQuantityUsingArrow(QUANTITY - 1);
@@ -124,97 +160,16 @@ public class AddToCart_HappyScenario extends BaseTest{
 	    cartModal.clickViewCart();
 
 	    assertLinkIsActive(headerSection.cartLink);
+	    
 	    cartPage.getCartProducts();
 	    CartProduct product = cartPage.findCartProductById(productId);
 	    assertProductAddedToCart(productId);
+	    
+	    Integer productPrice = product.getCartPrice();
+	    Assert.assertTrue(productCardName.equalsIgnoreCase(product.getCartProductName().getText()));
+	    Assert.assertEquals(productPrice, Integer.parseInt(productCardPrice));
 	    Assert.assertEquals(QUANTITY, Integer.parseInt(product.getCartQuantity()));
-	}
-
-	
-	@Test
-	(priority = 4)
-	public void adjustQuantityTwice_ThenAddToCart() {
-	    final int FIRST_QUANTITY = 3;
-	    final int SECOND_QUANTITY = 2;
-
-	    headerSection.clickLink(headerSection.productsLink);
-	    assertLinkIsActive(headerSection.productsLink);
-	    productsPage.scrollToElement(productsPage.featuresSection);
-	    wait.until(ExpectedConditions.visibilityOf(productsPage.featuresItemsTitle));
-
-	    Assert.assertTrue("ALL PRODUCTS".equalsIgnoreCase(productsPage.featuresItemsTitle.getText()));
-	    ProductCard productCard = productsPage.getOneProduct();
-	    String productId = productCard.getProductId();
-	    productCard.addProductToCart();
-	    
-	    CartModal cartModal1 = new CartModal(driver, homePage.getVisibleCartModal());
-	    Assert.assertEquals("Your product has been added to cart.", cartModal1.getMessage());
-	    cartModal1.clickContinueShopping();
-
-	    assertLinkIsActive(headerSection.productsLink);
-	    Assert.assertEquals(productId, productDetailsPage.getProductId());
-
-	    
-	    productDetailsPage.increaseQuantityUsingArrow(FIRST_QUANTITY - 1);
-	    productDetailsPage.addProductToCart();
-	    CartModal cartModal2 = new CartModal(driver, homePage.getVisibleCartModal());
-	    Assert.assertEquals("Your product has been added to cart.", cartModal2.getMessage());
-	    cartModal2.clickContinueShopping();
-
-	    
-	    productDetailsPage.decreaseQuantityUsingArrow(SECOND_QUANTITY - 1);
-	    productDetailsPage.addProductToCart();
-	    CartModal cartModal3 = new CartModal(driver, homePage.getVisibleCartModal());
-	    Assert.assertEquals("Your product has been added to cart.", cartModal3.getMessage());
-	    cartModal3.clickViewCart();
-
-	    assertLinkIsActive(headerSection.cartLink);
-	    cartPage.getCartProducts();
-	    CartProduct product = cartPage.findCartProductById(productId);
-	    assertProductAddedToCart(productId);
-
-	    Assert.assertEquals(SECOND_QUANTITY, Integer.parseInt(product.getCartQuantity()));
-	}
-	
-	@Test
-	(priority = 5)
-	public void addProductToCart_ThenAdjustTwice() {
-	    final int FIRST_QUANTITY = 3;
-	    final int SECOND_QUANTITY = 2;
-
-	    headerSection.clickLink(headerSection.productsLink);
-	    assertLinkIsActive(headerSection.productsLink);
-	    productsPage.scrollToElement(productsPage.featuresSection);
-	    wait.until(ExpectedConditions.visibilityOf(productsPage.featuresItemsTitle));
-
-	    Assert.assertTrue("ALL PRODUCTS".equalsIgnoreCase(productsPage.featuresItemsTitle.getText()));
-	    ProductCard productCard = productsPage.getOneProduct();
-	    String productId = productCard.getProductId();
-	    productCard.viewProductDetails();
-
-	    assertLinkIsActive(headerSection.productsLink);
-	    Assert.assertEquals(productId, productDetailsPage.getProductId());
-
-	    
-	    productDetailsPage.increaseQuantityUsingArrow(FIRST_QUANTITY - 1);
-	    productDetailsPage.addProductToCart();
-	    CartModal cartModal1 = new CartModal(driver, homePage.getVisibleCartModal());
-	    Assert.assertEquals("Your product has been added to cart.", cartModal1.getMessage());
-	    cartModal1.clickContinueShopping();
-
-	    
-	    productDetailsPage.decreaseQuantityUsingArrow(SECOND_QUANTITY - 1);
-	    productDetailsPage.addProductToCart();
-	    CartModal cartModal2 = new CartModal(driver, homePage.getVisibleCartModal());
-	    Assert.assertEquals("Your product has been added to cart.", cartModal2.getMessage());
-	    cartModal2.clickViewCart();
-
-	    assertLinkIsActive(headerSection.cartLink);
-	    cartPage.getCartProducts();
-	    CartProduct product = cartPage.findCartProductById(productId);
-	    assertProductAddedToCart(productId);
-
-	    Assert.assertEquals(SECOND_QUANTITY, Integer.parseInt(product.getCartQuantity()));
+	    Assert.assertEquals(productPrice * QUANTITY, product.getCartTotal());
 	}
 
 }

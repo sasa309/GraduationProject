@@ -3,14 +3,14 @@
 <suite name="Failed suite [Default suite]" guice-stage="DEVELOPMENT">
   <test thread-count="5" name="Default test(failed)">
     <classes>
-      <class name="Tests.Register_HappyScenario">
+      <class name="Tests.AddToCart_NegativeScenario">
         <methods>
           <include name="openBrowser"/>
           <include name="afterTest"/>
-          <include name="tetRegister_NewUserName_MandatoryAndOptional"/>
-          <include name="navigateToHome"/>
+          <include name="addNonNumericQuantity"/>
+          <include name="addInvalidQuantityProduct"/>
         </methods>
-      </class> <!-- Tests.Register_HappyScenario -->
+      </class> <!-- Tests.AddToCart_NegativeScenario -->
     </classes>
   </test> <!-- Default test(failed) -->
 </suite> <!-- Failed suite [Default suite] -->

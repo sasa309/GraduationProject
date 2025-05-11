@@ -4,7 +4,7 @@
     <classes>
       <class name="Tests.AddToCart_HappyScenario"/>
     </classes>
-  </test> <!-- Test -->
+  </test>
   <test name="AddToCart_NegativeCases">
     <classes>
       <class name="Tests.AddToCart_NegativeScenario"/>

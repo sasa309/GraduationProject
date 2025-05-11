@@ -32,16 +32,16 @@ public class CartProduct extends BasePage{
 		return quantityBtn.getText();
 	}
 
-	public String getCartPrice() {
-		// Assuming this is the unit price column
-		WebElement priceElement = root.findElement(By.cssSelector("td.cart_price p"));
-		return priceElement.getText();
+	public int getCartPrice() {
+		String priceElement = root.findElement(By.cssSelector("td.cart_price p")).getText();
+		String price = priceElement.replace("Rs.", " ").trim();
+		return Integer.parseInt(price);
 	}
 
-	public String getCartTotal() {
-		// Total per product (price * quantity)
-		WebElement totalElement = root.findElement(By.cssSelector("td.cart_total p"));
-		return totalElement.getText();
+	public int getCartTotal() {
+		String totalElement = root.findElement(By.cssSelector("td.cart_total p")).getText();
+		String price = totalElement.replace("Rs.", "").trim();
+		return Integer.parseInt(price);
 	}
 
 //	public void removeCartProduct() {
@@ -50,14 +50,15 @@ public class CartProduct extends BasePage{
 //	}
 	
 	public void removeCartProduct() {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+//		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 		
 		// أعد العثور على العنصر كل مرة عند الحاجة إليه
-		WebElement deleteButton = wait.until(ExpectedConditions.refreshed(
-			ExpectedConditions.elementToBeClickable(
-				root.findElement(By.cssSelector("td.cart_delete a"))
-			)
-		));
+		WebElement deleteButton = root.findElement(By.cssSelector("td.cart_delete > a"));
+//				wait.until(ExpectedConditions.refreshed(
+//			ExpectedConditions.elementToBeClickable(
+//				root.findElement(By.cssSelector("td.cart_delete > a"))
+//			)
+//		));
 		
 		deleteButton.click();
 	}

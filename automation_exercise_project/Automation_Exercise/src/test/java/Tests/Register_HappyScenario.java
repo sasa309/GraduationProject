@@ -1,5 +1,7 @@
 package Tests;
 
+import static org.testng.Assert.assertTrue;
+
 import java.time.Duration;
 
 import org.openqa.selenium.WebElement;
@@ -15,6 +17,7 @@ import Pages.CartPage;
 import Pages.HomePage;
 import Pages.LoginSignUpPage;
 import Pages.RegisterPage;
+import data.LoadProperties;
 
 public class Register_HappyScenario extends BaseTest{
 	HomePage homePage = new HomePage(driver);
@@ -24,6 +27,22 @@ public class Register_HappyScenario extends BaseTest{
 	CartPage cartPage = new CartPage(driver);
 	WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 	
+	String name = LoadProperties.userRegisterData.getProperty("name");
+	String email = LoadProperties.userRegisterData.getProperty("email");
+	String password = LoadProperties.userRegisterData.getProperty("password");
+	String day = LoadProperties.userRegisterData.getProperty("day");
+	String month = LoadProperties.userRegisterData.getProperty("month");
+	String year = LoadProperties.userRegisterData.getProperty("year");
+	String firstname = LoadProperties.userRegisterData.getProperty("firstname");
+	String lastname = LoadProperties.userRegisterData.getProperty("lastname");
+	String company = LoadProperties.userRegisterData.getProperty("company");
+	String address = LoadProperties.userRegisterData.getProperty("address");
+	String country = LoadProperties.userRegisterData.getProperty("country");
+	String state = LoadProperties.userRegisterData.getProperty("state");
+	String city = LoadProperties.userRegisterData.getProperty("city");
+	String zipCode = LoadProperties.userRegisterData.getProperty("zipCode");
+	String mobileNumber = LoadProperties.userRegisterData.getProperty("mobileNumber");
+	
 	 private void assertLinkIsActive(WebElement link) {
 	        Assert.assertEquals("rgba(255, 165, 0, 1)", link.getCssValue("color"));
 	 }
@@ -31,46 +50,43 @@ public class Register_HappyScenario extends BaseTest{
 	 @Test (priority = 1)
 	 public void tetRegister_NewUserName_MandatoryAndOptional() throws InterruptedException {
 		 assertLinkIsActive(headerSection.homeLink); 
-		 headerSection.clickLink(headerSection.signupLoginLink);
+		 headerSection.navigateTo(headerSection.signupLoginLink);
 		 Assert.assertTrue("New User Signup!".equalsIgnoreCase(loginSignUpPage.getUserRegisterMessage().getText()));
 		 
-		 loginSignUpPage.userCanRegister("khaledsameh","khaled234@gmail.com");
+		 loginSignUpPage.userCanRegister(name,email);
 		 Assert.assertTrue("ENTER ACCOUNT INFORMATION".equalsIgnoreCase(registerPage.enterAccountMessage.getText()));
 		  
-		 registerPage.enterAccountInformation("123456789",25,"12","2002","Abdelrahman","Osama","Itworx","Fostat City","United States","aaaa","bbbb","2164","01012465987");
+		 registerPage.enterAccountInformation(password,Integer.parseInt(day),month,year,firstname,lastname,company,address,country,state,city,zipCode,mobileNumber);
 		 Assert.assertEquals("Account Created!".toUpperCase(), registerPage.successMesssage.getText());
 		  
 		 registerPage.continueAccount();
-		 Assert.assertTrue("Logged in as khaled sameh".equalsIgnoreCase(headerSection.loggedInMessage.getText()));
+			assertTrue((firstname + " " + lastname).equalsIgnoreCase(headerSection.loggedInUser.getText()));
 		  
 		 registerPage.deleteAccount();
 		 Assert.assertTrue(registerPage.deleteMessage.getText().equalsIgnoreCase("Account Deleted!"));
 		  
 		 registerPage.continueAccount();
-		 Assert.assertEquals("rgba(255, 165, 0, 1)", headerSection.homeLink.getCssValue("color"));   
+		 assertLinkIsActive(headerSection.homeLink);   
 	 }
 	 
-//	 @Test
-//	 (priority = 2)
-//	 public void register_DuringCheckout() {
-//		 assertLinkIsActive(headerSection.homeLink);
-//		 homePage.scrollToElement(homePage.featuresSection);
-//		 wait.until(ExpectedConditions.visibilityOf(homePage.featuresItemsTitle));
-//		 
-//		 Assert.assertEquals("FEATURES ITEMS", homePage.featuresItemsTitle.getText());
-//		 ProductCard productCard = homePage.getOneFeaturesProduct();
-//		 String productId = productCard.getProductId();
-//		 productCard.addProductToCart();
-//		 
-//		 wait.until(ExpectedConditions.visibilityOf(cartPage.processedToCheckoutBtn));
-//		 cartPage.processToCheckout();
-//		 
-//		 CartModal cartModal = new CartModal(driver, cartPage.getVisibleCartModal());
-//		 Assert.assertEquals("Register / Login account to proceed on checkout.", cartModal.getMessage());
-//		 
-//		 cartModal.navigateToLoginSignupPage();
-//		 Assert.assertTrue("New User Signup!".equalsIgnoreCase(loginSignUpPage.getUserRegisterMessage().getText()));
-//	 }
-	 
-	 
+	 @Test
+	 (priority = 2)
+	 public void register_DuringCheckout() throws InterruptedException {
+		 homePage.scrollToElement(homePage.featuresSection);
+		 wait.until(ExpectedConditions.visibilityOf(homePage.featuresItemsTitle));
+		 Assert.assertEquals("FEATURES ITEMS", homePage.featuresItemsTitle.getText());
+		 
+		 ProductCard productCard = homePage.getOneFeaturesProduct();
+		 Thread.sleep(1000);
+		 productCard.addProductToCart();
+		 
+		 wait.until(ExpectedConditions.visibilityOf(cartPage.processedToCheckoutBtn));
+		 cartPage.processToCheckout();
+		 
+		 CartModal cartModal = new CartModal(driver, cartPage.getVisibleCartModal());
+		 Assert.assertEquals("Register / Login account to proceed on checkout.", cartModal.getMessage());
+		 
+		 cartModal.navigateToLoginSignupPage();
+		 Assert.assertTrue("New User Signup!".equalsIgnoreCase(loginSignUpPage.getUserRegisterMessage().getText()));
+	 }
 }

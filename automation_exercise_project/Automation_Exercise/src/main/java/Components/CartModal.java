@@ -3,10 +3,12 @@ package Components;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import Pages.BasePage;
 
 public class CartModal extends BasePage{
+	private Actions actions = new Actions(driver);
 	private WebElement root;
 	
 	
@@ -20,8 +22,10 @@ public class CartModal extends BasePage{
     }
 
     public void clickContinueShopping() {
-        root.findElement(By.cssSelector(".btn.btn-success")).click();
+        WebElement continueButton = root.findElement(By.cssSelector("div.modal-footer > button"));
+        actions.moveToElement(continueButton).click().perform();
     }
+
 
     public void clickViewCart() {
     	root.findElement(By.partialLinkText("View Cart")).click();

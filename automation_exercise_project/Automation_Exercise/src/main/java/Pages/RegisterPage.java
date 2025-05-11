@@ -109,12 +109,15 @@ public class RegisterPage extends BasePage{
 	public void enterAccountInformation(
 			String password,int day,String month,String year,
 			String firstName,String lastName,String company,String address,
-			String Country,String state,String city,String zipCode,
+			String country,String state,String city,String zipCode,
 			String mobileNumber
 			) {
 		
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		
 		maleGenderBtn.click();
 		
+		js.executeScript("arguments[0].scrollIntoView({behavior: 'smooth'});", passwordTxt);
 		passwordTxt.sendKeys(password);
 		
 		Select makeDaysList = new Select(daysList);
@@ -129,16 +132,15 @@ public class RegisterPage extends BasePage{
 		newsLetterBtn.click();
 		specialOfferBtn.click();
 		
-		 JavascriptExecutor js = (JavascriptExecutor) driver;
-		 js.executeScript("arguments[0].scrollIntoView(true);", firstNameTxt);
-		
+		js.executeScript("arguments[0].scrollIntoView({behavior: 'smooth'});", firstNameTxt);
 		firstNameTxt.sendKeys(firstName);
 		lastNameTxt.sendKeys(lastName);
 		companyTxt.sendKeys(company);
 		addressTxt1.sendKeys(address);
 		
-		makeCountryList.selectByValue(Country);
+		makeCountryList.selectByValue(country);
 		
+		js.executeScript("arguments[0].scrollIntoView({behavior: 'smooth'});", stateTxt);
 		stateTxt.sendKeys(state);
 		cityTxt.sendKeys(city);
 		

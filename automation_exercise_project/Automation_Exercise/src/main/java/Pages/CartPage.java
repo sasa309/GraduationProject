@@ -16,7 +16,7 @@ import Components.CartProduct;
 
 public class CartPage extends BasePage{
 
-	public ArrayList<CartProduct> cartProducts = new ArrayList<CartProduct>();
+	public ArrayList<CartProduct> cartProducts = new ArrayList<CartProduct>(); 
 	
 	public CartPage(WebDriver driver) {
 		super(driver);
@@ -28,11 +28,21 @@ public class CartPage extends BasePage{
 	@FindBy(xpath = "//*[@id=\"do_action\"]/div[1]/div/div/a")
 	public WebElement processedToCheckoutBtn;
 	
-	@FindBy(id = "cartModal")
+	@FindBy(id = "do_action")
+	public WebElement processedCheckOutSection;
+	
+	@FindBy(id = "checkoutModal")
     public WebElement cartModal;
 	
-	public void scrollToElement(CartProduct element) {
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({behavior: 'smooth'});", element.getCartProductName());
+	@FindBy(id = "empty_cart")
+	public WebElement emptyCart;
+	
+	@FindBy(xpath = "//*[@id=\"empty_cart\"]/p/a")
+	public WebElement productsPageLink;
+	
+	
+	public void scrollToElement(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({behavior: 'smooth'});", element);
     }
 	
 	public WebElement getVisibleCartModal() {
@@ -40,12 +50,13 @@ public class CartPage extends BasePage{
         return wait.until(ExpectedConditions.visibilityOf(cartModal));
     }
 
-    public void getCartProducts() {
-    	List<WebElement> products =  cartTabl.findElement(By.tagName("tbody")).findElements(By.tagName("tr"));
-    	for (WebElement cartProduct : products) {
-			cartProducts.add(new CartProduct(driver, cartProduct));
-		}
-    }
+	public void getCartProducts() {
+	    cartProducts.clear(); 
+	    List<WebElement> products =  cartTabl.findElement(By.tagName("tbody")).findElements(By.tagName("tr"));
+	    for (WebElement cartProduct : products) {
+	        cartProducts.add(new CartProduct(driver, cartProduct));
+	    }
+	}
     
     public CartProduct findCartProductById(String productId) {
         for (CartProduct product : cartProducts) {
@@ -53,29 +64,50 @@ public class CartPage extends BasePage{
                 return product;
             }
         }
-        return null;  // لو المنتج مش موجود
+        return null;
     }
 
-    // دالة للبحث عن منتج معين بواسطة اسم المنتج
     public CartProduct findCartProductByName(String productName) {
         for (CartProduct product : cartProducts) {
             if (product.getCartProductName().getText().equals(productName)) {
                 return product;
             }
         }
-        return null;  // لو المنتج مش موجود
+        return null;
     }
     
-    public CartProduct getLastCartProduct() {
-    	return cartProducts.getLast();
+    public void removeProduct(String productId) {
+        for (CartProduct product : cartProducts) {
+            if (product.getCartProductId().equals(productId)) {
+                cartProducts.remove(product);
+            }
+        }
     }
     
     public boolean isCartEmpty() {
-    	return cartProducts.size() == 0;
+    	String status = emptyCart.getCssValue("display");
+    	if(status.equalsIgnoreCase("none"))
+    		return false;
+    	return true;
     }
     
     public void processToCheckout() {
 		processedToCheckoutBtn.click();
 	}
-
+    
+    public void removeAllProducts() {
+    	for (CartProduct product : cartProducts) {
+            product.removeCartProduct();
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    	    wait.until(ExpectedConditions.stalenessOf(product.getCartProductName()));
+        }
+	}
+    
+    public WebElement getCartModalMessage() {
+		return driver.findElement(By.xpath("//*[@id=\"checkoutModal\"]/div/div/div[2]/p[1]"));
+	}
+    
+    public void navigateToProductsPage() {
+    	productsPageLink.click();
+	}
 }

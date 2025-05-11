@@ -6,8 +6,11 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class LoadProperties {
-	 static String filePath = System.getProperty("user.dir")+"\\src\\main\\java\\Properties\\userData.properties";
-	 static public Properties userData = LoadJavaProperties(filePath);
+	 static String loginUserDataFilePath = System.getProperty("user.dir")+"\\src\\main\\java\\Properties\\loginUserData.properties";
+	 static public Properties userLoginData = LoadJavaProperties(loginUserDataFilePath);
+	 
+	 static String registerUserDataFilePath = System.getProperty("user.dir")+"\\src\\main\\java\\Properties\\registerUserData.properties";
+	 static public Properties userRegisterData = LoadJavaProperties(registerUserDataFilePath);
 	
 	private static Properties LoadJavaProperties(String filePath) {
 		Properties pro = new Properties();

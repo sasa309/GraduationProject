@@ -23,8 +23,9 @@ public class ProductCard extends BasePage{
 		return root.findElement(By.cssSelector("div.productinfo")).findElement(By.tagName("p"));
 	}
 	
-	public WebElement getProductPrice() {
-		return root.findElement(By.cssSelector("div.productinfo")).findElement(By.tagName("h2"));
+	public String getProductPrice() {
+		String priceString =  root.findElement(By.cssSelector("div.productinfo")).findElement(By.tagName("h2")).getText();
+		return priceString.replace("Rs.", " ").trim();
 	}
 	
 	public WebElement getProductImage() {
@@ -41,9 +42,6 @@ public class ProductCard extends BasePage{
 	
 	public void addProductToCart() {
 		root.findElement(By.partialLinkText("Add to cart")).click();
-//		WebElement addToCartButton = root.findElement(By.partialLinkText("Add to cart"));
-//	    Actions actions = new Actions(driver);  // تأكد إن driver متاح هنا
-//	    actions.moveToElement(addToCartButton).click().perform();
 	}
 	
 }

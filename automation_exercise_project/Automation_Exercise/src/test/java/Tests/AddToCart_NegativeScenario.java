@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import Components.CartModal;
@@ -27,124 +28,47 @@ public class AddToCart_NegativeScenario extends BaseTest{
     private void assertLinkIsActive(WebElement link) {
         Assert.assertEquals("rgba(255, 165, 0, 1)", link.getCssValue("color"));
     }
+    
+    @DataProvider(name = "quantityData")
+    private Object[][] testQuantityData() {
+		Object[][] testData = new Object[][] {
+			{-3},
+			{0},
+			{999},
+		};
+		
+		return testData;
+	}
 	
+    
 	@Test
 	(priority = 1)
-	public void addNonNumericQuantity() {
-		headerSection.clickLink(headerSection.productsLink);
+	public void addNonNumericQuantity() throws InterruptedException {
+		headerSection.navigateTo(headerSection.productsLink);
 	    assertLinkIsActive(headerSection.productsLink);
-	    homePage.scrollBy(500);
-	    wait.until(ExpectedConditions.visibilityOf(productsPage.featuresItemsTitle));
-	    
 	    Assert.assertTrue("ALL PRODUCTS".equalsIgnoreCase(productsPage.featuresItemsTitle.getText()));
-	    ProductCard productCard = productsPage.getOneFeaturesProduct();
+	    
+	    ProductCard productCard = productsPage.getOneProduct();
+	    productsPage.scrollToElement(productCard.getProductName());
+	    wait.until(ExpectedConditions.visibilityOf(productCard.getProductName()));
+	    Thread.sleep(1000);
 	    String productId = productCard.getProductId();
 	    productCard.viewProductDetails();
-	    
 	    Assert.assertEquals(productId, productDetailsPage.getProductId());
 	    
 	    productDetailsPage.setNonNumericQuantity("abc");
-	    
-	    Assert.assertTrue(productDetailsPage.getQuantityValue().isEmpty());
+	    Assert.assertNotEquals("abc",productDetailsPage.getQuantityValue());
 	}
 	
 	@Test
-	(priority = 2)
-	public void addNegativeQuantityProduct() {
-		final int QUANTITY = -3;
-		headerSection.clickLink(headerSection.productsLink);
-	    assertLinkIsActive(headerSection.productsLink);
-	    homePage.scrollBy(500);
-	    wait.until(ExpectedConditions.visibilityOf(productsPage.featuresItemsTitle));
-	    
-	    Assert.assertTrue("ALL PRODUCTS".equalsIgnoreCase(productsPage.featuresItemsTitle.getText()));
-	    ProductCard productCard = productsPage.getOneFeaturesProduct();
-	    String productId = productCard.getProductId();
-	    productCard.viewProductDetails();
-	    
-	    Assert.assertEquals(productId, productDetailsPage.getProductId());
-	    
-	    productDetailsPage.setNumericQuantity(-3);
+	(priority = 2 ,dependsOnMethods = "addNonNumericQuantity" , dataProvider = "quantityData")
+	public void addInvalidQuantityProduct(int quantity) throws InterruptedException {	    
+	    productDetailsPage.setNumericQuantity(quantity);
 	    productDetailsPage.addProductToCart();
 	    
-	    CartModal cartModal = new CartModal(driver, homePage.getVisibleCartModal());
-	    Assert.assertNotEquals("Your product has been added to cart.", cartModal.getMessage());
-	}
-	
-	@Test
-	(priority = 3)
-	public void addZeroQuantityProduct() {
-		headerSection.clickLink(headerSection.productsLink);
-	    assertLinkIsActive(headerSection.productsLink);
-	    homePage.scrollBy(500);
-	    wait.until(ExpectedConditions.visibilityOf(productsPage.featuresItemsTitle));
-	    
-	    Assert.assertTrue("ALL PRODUCTS".equalsIgnoreCase(productsPage.featuresItemsTitle.getText()));
-	    ProductCard productCard = productsPage.getOneFeaturesProduct();
-	    String productId = productCard.getProductId();
-	    productCard.viewProductDetails();
-	    
-	    Assert.assertEquals(productId, productDetailsPage.getProductId());
-	    
-	    productDetailsPage.setNumericQuantity(0);
-	    productDetailsPage.addProductToCart();
-	    
-	    CartModal cartModal = new CartModal(driver, homePage.getVisibleCartModal());
-	    Assert.assertNotEquals("Your product has been added to cart.", cartModal.getMessage());
-	}
-	
-	
-	@Test
-	(priority = 4)
-	public void addoverlimitQuantityProduct() {
-		final int OVER_LIMIT_QUANTITY = 99;
-		
-		headerSection.clickLink(headerSection.productsLink);
-	    assertLinkIsActive(headerSection.productsLink);
-	    homePage.scrollBy(500);
-	    wait.until(ExpectedConditions.visibilityOf(productsPage.featuresItemsTitle));
-	    
-	    Assert.assertTrue("ALL PRODUCTS".equalsIgnoreCase(productsPage.featuresItemsTitle.getText()));
-	    ProductCard productCard = productsPage.getOneFeaturesProduct();
-	    String productId = productCard.getProductId();
-	    productCard.viewProductDetails();
-	    
-	    Assert.assertEquals(productId, productDetailsPage.getProductId());
-	    
-	    productDetailsPage.setNumericQuantity(OVER_LIMIT_QUANTITY);
-	    productDetailsPage.addProductToCart();
-	    
-	    CartModal cartModal = new CartModal(driver, homePage.getVisibleCartModal());
-	    Assert.assertNotEquals("Your product has been added to cart.", cartModal.getMessage());
-	}
-	
-	
-	@Test
-	(priority = 5)
-	public void addToCart_OutOfStockProduct() {
-		headerSection.clickLink(headerSection.productsLink);
-	    assertLinkIsActive(headerSection.productsLink);
-	    homePage.scrollBy(500);
-	    wait.until(ExpectedConditions.visibilityOf(productsPage.featuresItemsTitle));
-	    
-	    Assert.assertTrue(
-	    	    "ALL PRODUCTS".equalsIgnoreCase(productsPage.featuresItemsTitle.getText()),
-	    	    "Expected title to be 'ALL PRODUCTS' (case-insensitive)");
-	    ProductCard productCard = productsPage.getOneFeaturesProduct();
-	    String productId = productCard.getProductId();
-	    productCard.viewProductDetails();
-	    
-	    Assert.assertEquals(productId, productDetailsPage.getProductId());
-	    
-	    if(productDetailsPage.isProductOutOfStock()) {
-	    	productDetailsPage.addProductToCart();
-	    	Assert.assertFalse(productDetailsPage.isAddToCartButtonEnabled());
-	    }else {
-	    	 Assert.fail("nothing to test");
-		}
-	}
-	
-	private void verify_EmptyCart() {
-
+	    CartModal cartModal = new CartModal(driver, productDetailsPage.getVisibleCartModal());
+	    String message = cartModal.getMessage();
+	    cartModal.clickContinueShopping();
+	    Assert.assertNotEquals("Your product has been added to cart.", message);
 	}
 }

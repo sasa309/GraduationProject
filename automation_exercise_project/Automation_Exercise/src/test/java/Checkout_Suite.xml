@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite parallel="false" name="Checkout_Suite">
+  <test name="Checkout_HappyCases">
+    <classes>
+      <class name="Tests.Checkout_HappyScenario"/>
+    </classes>
+  </test> <!-- Test -->
+  <test name="Checkout_NegativeCases">
+    <classes>
+      <class name="Tests.Checkout_NegativeScenario"/>
+    </classes>
+  </test>
+</suite> <!-- Suite -->

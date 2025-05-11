@@ -30,10 +30,17 @@ public class Header extends BasePage{
     @FindBy(linkText = "Contact Us")
     public WebElement contactUsLink;
     
-    @FindBy(partialLinkText = "Logged in as")
-    public WebElement loggedInMessage;
+    @FindBy(partialLinkText = "Logout")
+    public WebElement logoutBtn;
     
-    public void clickLink(WebElement linkText) {
+    @FindBy(css = "#header > div > div > div > div.col-sm-8 > div > ul > li:nth-child(10) > a > b")
+    public WebElement loggedInUser;
+    
+    public void navigateTo(WebElement linkText) {
         linkText.click();
     }
+    
+    public void userLogout() {
+    	logoutBtn.click();
+	}
 }
