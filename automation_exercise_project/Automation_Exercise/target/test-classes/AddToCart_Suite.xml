@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite parallel="false" name="AddToCart_Suite">
+  <test name="AddToCart_HappyCases">
+    <classes>
+      <class name="Tests.AddToCart_HappyScenario"/>
+    </classes>
+  </test>
+  <test name="AddToCart_NegativeCases">
+    <classes>
+      <class name="Tests.AddToCart_NegativeScenario"/>
+    </classes>
+  </test> <!-- Test -->
+</suite> <!-- Suite -->
